@@ -51,18 +51,16 @@ public class QuizGame {
     }
 
     private void displayMainMenu() {
-        if (username.isEmpty()) {
-            setUsername();
-        }
         System.out.println("""
                 \033[96m\033[1m
-                MAIN MENU\033[0m
+                MAIN MENU\033[0m\t\t\t\033[90m\033[3mUsername: \033[36m""" + username + """
+                \033[0m
                 1. Start a new quiz
                 2. Scoreboards
                 3. Change username
                 4. Quit
                 
-                Enter number for the action you want.
+                Enter number in console, for the corresponding action you want
                 \033[90m(You can also write "menu" or "quit" in console at any time to go back to main menu or quit the application.)\033[0m""");
         chooseMainMenuOption();
     }
@@ -89,6 +87,31 @@ public class QuizGame {
                 chooseMainMenuOption();
             }
         }
+    }
+    private void escapeToMainMenu() {
+        System.out.println("\033[90mEnter any normal key to go to main menu\033[0m");
+        userInput.nextLine();
+        displayMainMenu();
+    }
+
+    // Displays menu to choose quiz topic
+    private void chooseQuizTopic() {
+        System.out.println("""
+                \033[96m\033[1m
+                Quiz topics\033[0m
+                1. Minecraft (Multiple choice)
+                2. Rocket League (True or False)
+                \033[90m(Enter number corresponding to preferred quiz)\033[0m""");
+        startNewQuiz(validateChooseQuizTopicsChoice());
+    }
+    private String validateChooseQuizTopicsChoice() {
+        String[] validChoice = {"1", "2", "menu", "quit"};
+        String userChoice = userInput.nextLine();
+        while (Arrays.stream(validChoice).noneMatch(userChoice::equalsIgnoreCase)) {
+            System.out.println("\033[31m'" + userChoice + "' is not an option. \nPlease choose one either 1 or 2\033[0m");
+            userChoice = userInput.nextLine();
+        }
+        return userChoice;
     }
 
     // Displays scoreboard sub menu
@@ -133,33 +156,9 @@ public class QuizGame {
         return userChoice;
     }
 
-    private void chooseQuizTopic() {
-        // TODO: make text fancy
-        System.out.println("""
-                Quiz topics:
-                
-                1. Minecraft (Multiple choice)
-                2. Rocket League (True or False)
-                
-                Enter number corresponding to preferred quiz:""");
-        quizTopicChoice = validateChooseQuizTopicsChoice();
-        startNewQuiz();
-    }
-    private String validateChooseQuizTopicsChoice() {
-        String[] validChoice = {"1", "2", "menu", "quit"};
-        String userChoice = userInput.nextLine();
-        while (Arrays.stream(validChoice).noneMatch(userChoice::equalsIgnoreCase)) {
-            System.out.println("\033[31m'" + userChoice + "' is not an option. \nPlease choose one either 1 or 2\033[0m");
-            userChoice = userInput.nextLine();
-        }
-        return userChoice;
-    }
-
-    private void startNewQuiz() {
+    private void startNewQuiz(String quizTopicChoice) {
         userScore = 0;
         newQuizStartTime = new Date().getTime();
-        System.out.println(newQuizStartTime);
-        quizIsOngoing = true;
         switch (quizTopicChoice) {
             case "1" -> multiChoiceQuiz();
             case "2" -> binaryQuiz();
@@ -167,14 +166,10 @@ public class QuizGame {
     }
 
     // Runs multi choice quiz
-    String quizTopicChoice;
-    boolean quizIsOngoing = true;
-    ArrayList<Quiz> questions;
-
     private void multiChoiceQuiz() {
         quizTopic = "Minecraft";
-        int i = 0;
-        questions = new ArrayList<>();
+        System.out.println(quizTopic);
+        ArrayList<Quiz> questions = new ArrayList<>();
         try (PreparedStatement stmt = con.prepareStatement("SELECT * FROM multichoicequiz")){
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
@@ -189,53 +184,16 @@ public class QuizGame {
             e.printStackTrace();
         }
 
-        while (quizIsOngoing) {
-            nextQuestion(i);
-            String answer = validateMultiChoiceQuizAnswer();
-
-            if (answer.equalsIgnoreCase(questions.get(i).correctAnswer)) {
-                System.out.println("\033[92mYou are correct!\n\033[0m");
-                userScore++;
-            }
-            else {
-                switch (answer.toLowerCase()) {
-                    case "menu" -> {displayMainMenu(); quizIsOngoing = false;}
-                    case "quit" -> System.exit(0);
-                    default -> System.out.println("\033[91mSorry, wrong answer\n\033[0m");
-                }
-            }
-            i++;
-            if (i >= questions.size()) quizIsOngoing = false;
-        }
-
-        // Makes a new score object with current username, score, topic, and the calculated time from start of quiz to now
-        UserScore score = new UserScore(username, userScore, (int)(new Date().getTime() - newQuizStartTime) / 1000, quizTopic);
-        addNewScoreToScoreboard(score);
-        displayMinecraftScoreboard(score);
-    }
-    private String validateMultiChoiceQuizAnswer() {
         String[] validAnswers = {"A", "B", "C", "D", "menu", "quit"};
-        String answer = userInput.nextLine();
-        while (Arrays.stream(validAnswers).noneMatch(answer::equalsIgnoreCase)) {
-            System.out.println("\033[31m'" + answer + "' is not an option. \nPlease choose one of the options A, B, C, D, menu or quit\033[0m");
-            answer = userInput.nextLine();
-        }
-        return answer;
-    }
-    private void nextQuestion(int i) {
-        System.out.println("Question " + (i + 1));
-        questions.get(i).showQuestion();
+        iterateThroughQuestions(questions, validAnswers);
+
+        quizFinished();
     }
 
-    private void iterateThroughQuestions() {
-
-    }
-
+    // Runs binary quiz
     private void binaryQuiz() {
         quizTopic = "Rocket League";
-        int i = 0;
-        questions = new ArrayList<>();
-
+        ArrayList<Quiz> questions = new ArrayList<>();
         try (PreparedStatement stmt = con.prepareStatement("SELECT * FROM binaryquiz")){
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
@@ -247,22 +205,52 @@ public class QuizGame {
             e.printStackTrace();
         }
 
-        while (quizIsOngoing) {
-            nextQuestion(i);
-            String answer = validateBinaryQuizAnswer();
+        String[] validAnswers = {"yes", "no", "menu", "quit"};
+        iterateThroughQuestions(questions, validAnswers);
 
-            i++;
-            if (i >= questions.size()) quizIsOngoing = false;
-        }
+        quizFinished();
+    }
+    /** Makes a new score object with current username, score, topic, and the calculated time from start of quiz to now, and adds it to the database */
+    private void quizFinished() {
         UserScore score = new UserScore(username, userScore, (int)(new Date().getTime() - newQuizStartTime) / 1000, quizTopic);
         addNewScoreToScoreboard(score);
-        displayRocketLeagueScoreboard(score);
+        switch (quizTopic) {
+            case "Minecraft" -> displayMinecraftScoreboard(score);
+            case "Rocket League" -> displayRocketLeagueScoreboard(score);
+        }
     }
-    private String validateBinaryQuizAnswer() {
-        String[] validAnswers = {"yes", "no", "menu", "quit"};
+
+    private void iterateThroughQuestions(ArrayList<Quiz> questions, String[] validAnswers) {
+        int i = 1;
+        for (Quiz question : questions) {
+            System.out.println("Question " + i);
+            question.showQuestion();
+            String answer = validateQuizAnswer(validAnswers);
+
+            if (answer.equalsIgnoreCase(question.correctAnswer)) {
+                System.out.println("\033[92mYou are correct!\n\033[0m");
+                userScore++;
+            }
+            else {
+                switch (answer.toLowerCase()) {
+                    case "menu" -> displayMainMenu();
+                    case "quit" -> System.exit(0);
+                    default -> System.out.println("\033[91mSorry, wrong answer\n\033[0m");
+                }
+            }
+            i++;
+        }
+    }
+
+    private String validateQuizAnswer(String[] validAnswers) {
         String answer = userInput.nextLine();
         while (Arrays.stream(validAnswers).noneMatch(answer::equalsIgnoreCase)) {
-            System.out.println("\033[31m'" + answer + "' is not an option. \nPlease answer with yes, no, menu or quit\033[0m");
+            if (quizTopic.equals("Minecraft")) {
+                System.out.println("\033[31m'" + answer + "' is not an option. \nPlease choose one of the options A, B, C, D, menu or quit\033[0m");
+            }
+            else if (quizTopic.equals("Rocket League")) {
+                System.out.println("\033[31m'" + answer + "' is not an option. \nPlease answer with yes, no, menu or quit\033[0m");
+            }
             answer = userInput.nextLine();
         }
         return answer;
@@ -288,34 +276,35 @@ public class QuizGame {
     private void displayScoreBoard(UserScore highlightThisScore, String sql) {
         try (PreparedStatement stmt = con.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
-            System.out.format("\033[96m\033[1m%-20s %5s %5s", "Username", "Score", "Time\033[0m");
+            System.out.format("\033[96m\033[1m%-20s %5s %5s %s", "Username", "Score", "Time", "\033[0m\n");
             while (rs.next()) {
                 UserScore score = new UserScore(
                         rs.getString("username"),
                         rs.getInt("score"),
                         rs.getInt("time"),
                         rs.getString("topic"));
-                if (score.username().equalsIgnoreCase(highlightThisScore.username())) {
-                    System.out.format("\033[97m" + score + "\033[0m");
+                if (score.username().equals(highlightThisScore.username())) {
+                    System.out.format("\033[97m" + score + "\033[0m\n");
                 }
                 else System.out.println(score);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        escapeToMainMenu();
     }
     private void displayMinecraftScoreboard(UserScore highlightThisScore) {
-        String sql = "SELECT * FROM scoreboard WHERE topic = 'Minecraft'";
+        String sql = "SELECT * FROM scoreboard WHERE topic = 'Minecraft' ORDER BY score DESC, time ASC";
         displayScoreBoard(highlightThisScore, sql);
     }
     private void displayRocketLeagueScoreboard(UserScore highlightThisScore) {
-        String sql = "SELECT * FROM scoreboard WHERE topic = 'Rocket League'";
+        String sql = "SELECT * FROM scoreboard WHERE topic = 'Rocket League' ORDER BY score DESC, time ASC";
         displayScoreBoard(highlightThisScore, sql);
 
     }
 
     private void minecraftQuizHighScores() {
-        try (PreparedStatement stmt = con.prepareStatement("SELECT * FROM scoreboard WHERE topic = 'Minecraft' LIMIT 10")) {
+        try (PreparedStatement stmt = con.prepareStatement("SELECT * FROM scoreboard WHERE topic = 'Minecraft' ORDER BY score DESC, time ASC LIMIT 10")) {
             ResultSet rs = stmt.executeQuery();
             System.out.format("\033[96m\033[1m%-20s %5s %5s", "Username", "Score", "Time\033[0m");
             while (rs.next()) {
@@ -328,9 +317,10 @@ public class QuizGame {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        escapeToMainMenu();
     }
     private void rocketLeagueQuizHighScores() {
-        try (PreparedStatement stmt = con.prepareStatement("SELECT * FROM scoreboard WHERE topic = 'Rocket League' LIMIT 10")) {
+        try (PreparedStatement stmt = con.prepareStatement("SELECT * FROM scoreboard WHERE topic = 'Rocket League' ORDER BY score DESC, time ASC LIMIT 10")) {
             ResultSet rs = stmt.executeQuery();
             System.out.format("\033[96m\033[1m%-20s %5s %5s", "Username", "Score", "Time\033[0m");
             while (rs.next()) {
@@ -343,6 +333,7 @@ public class QuizGame {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        escapeToMainMenu();
     }
 
     private void listAllScoresForUser(String user) {
@@ -360,6 +351,7 @@ public class QuizGame {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        escapeToMainMenu();
     }
 }
 
