@@ -5,7 +5,7 @@ import static java.lang.String.format;
 public record UserScore(String username, int score, int time, String topic) {
     @Override
     public String toString() {
-        return format("%-20s %5d %5d%s", username, score, time, "s");
+        return format("%-20s %5d %5ds", username, score, time);
     }
 
     public String toStringWithTopic() {

@@ -8,8 +8,8 @@ public class BinaryQuiz extends Quiz {
 
     @Override
     public void showQuestion() {
-        System.out.println(super.question);
-        System.out.println("Answer yes or no");
+        System.out.println("\033[1m" + super.question + "\033[0m");
+        System.out.println("\033[90mAnswer yes or no\033[0m");
     }
 
 }

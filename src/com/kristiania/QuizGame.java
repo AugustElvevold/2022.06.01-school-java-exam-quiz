@@ -94,7 +94,7 @@ public class QuizGame {
         displayMainMenu();
     }
 
-    // Displays menu to choose quiz topic
+    /** Displays menu to choose quiz topic */
     private void chooseQuizTopic() {
         System.out.println("""
                 \033[96m\033[1m
@@ -114,7 +114,7 @@ public class QuizGame {
         return userChoice;
     }
 
-    // Displays scoreboard sub menu
+    /** Displays scoreboard sub menu */
     private void scoreboardMenu() {
         //TODO: make fancy
         System.out.println("""
@@ -162,16 +162,21 @@ public class QuizGame {
         switch (quizTopicChoice) {
             case "1" -> multiChoiceQuiz();
             case "2" -> binaryQuiz();
+            case "menu" -> displayMainMenu();
+            case "quit" -> {
+                    System.out.println("Program quiting..\nggs");
+                    System.exit(0);
+            }
         }
     }
 
-    // Runs multi choice quiz
+    /** Runs multi choice quiz */
     private void multiChoiceQuiz() {
         quizTopic = "Minecraft";
         System.out.println(quizTopic);
         ArrayList<Quiz> questions = new ArrayList<>();
-        try (PreparedStatement stmt = con.prepareStatement("SELECT * FROM multichoicequiz")){
-            ResultSet rs = stmt.executeQuery();
+        try (PreparedStatement stmt = con.prepareStatement("SELECT * FROM multichoicequiz");
+            ResultSet rs = stmt.executeQuery()){
             while (rs.next()) {
                 questions.add(new MultiChoiceQuiz(rs.getString("question"),
                         rs.getString("correctAnswer"),
@@ -190,7 +195,7 @@ public class QuizGame {
         quizFinished();
     }
 
-    // Runs binary quiz
+    /** Runs binary quiz */
     private void binaryQuiz() {
         quizTopic = "Rocket League";
         ArrayList<Quiz> questions = new ArrayList<>();
@@ -210,6 +215,7 @@ public class QuizGame {
 
         quizFinished();
     }
+
     /** Makes a new score object with current username, score, topic, and the calculated time from start of quiz to now, and adds it to the database */
     private void quizFinished() {
         UserScore score = new UserScore(username, userScore, (int)(new Date().getTime() - newQuizStartTime) / 1000, quizTopic);
@@ -223,19 +229,19 @@ public class QuizGame {
     private void iterateThroughQuestions(ArrayList<Quiz> questions, String[] validAnswers) {
         int i = 1;
         for (Quiz question : questions) {
-            System.out.println("Question " + i);
+            System.out.println("\nQuestion " + i);
             question.showQuestion();
             String answer = validateQuizAnswer(validAnswers);
 
             if (answer.equalsIgnoreCase(question.correctAnswer)) {
-                System.out.println("\033[92mYou are correct!\n\033[0m");
+                System.out.println("\033[92mYou are correct!\033[0m");
                 userScore++;
             }
             else {
                 switch (answer.toLowerCase()) {
                     case "menu" -> displayMainMenu();
                     case "quit" -> System.exit(0);
-                    default -> System.out.println("\033[91mSorry, wrong answer\n\033[0m");
+                    default -> System.out.println("\033[91mSorry, wrong answer\033[0m");
                 }
             }
             i++;
@@ -276,15 +282,19 @@ public class QuizGame {
     private void displayScoreBoard(UserScore highlightThisScore, String sql) {
         try (PreparedStatement stmt = con.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
-            System.out.format("\033[96m\033[1m%-20s %5s %5s %s", "Username", "Score", "Time", "\033[0m\n");
+            System.out.println("\n\033[96m\033[1mAll " + quizTopic + " scores\033[0m");
+            System.out.format("\033[36m\033[1m%-20s %5s %4s %s", "Username", "Score", "Time", "\033[0m\n");
             while (rs.next()) {
                 UserScore score = new UserScore(
                         rs.getString("username"),
                         rs.getInt("score"),
                         rs.getInt("time"),
                         rs.getString("topic"));
-                if (score.username().equals(highlightThisScore.username())) {
-                    System.out.format("\033[97m" + score + "\033[0m\n");
+                if (score.username().equals(highlightThisScore.username()) &&
+                    score.score() == (highlightThisScore.score()) &&
+                    score.time() == (highlightThisScore.time())
+                ) {
+                    System.out.format("\033[97m\033[1m" + score + "\033[0m\n");
                 }
                 else System.out.println(score);
             }
@@ -304,9 +314,10 @@ public class QuizGame {
     }
 
     private void minecraftQuizHighScores() {
-        try (PreparedStatement stmt = con.prepareStatement("SELECT * FROM scoreboard WHERE topic = 'Minecraft' ORDER BY score DESC, time ASC LIMIT 10")) {
+        try (PreparedStatement stmt = con.prepareStatement("SELECT * FROM scoreboard WHERE topic = 'Minecraft' ORDER BY score DESC, time LIMIT 10")) {
             ResultSet rs = stmt.executeQuery();
-            System.out.format("\033[96m\033[1m%-20s %5s %5s", "Username", "Score", "Time\033[0m");
+            System.out.println("\n\033[96m\033[1mTop 10 Minecraft scores\033[0m");
+            System.out.format("\033[36m\033[1m%-20s %5s %6s %s", "Username", "Score", "Time", "\n\033[0m");
             while (rs.next()) {
                 System.out.println(new UserScore(
                         rs.getString("username"),
@@ -320,9 +331,10 @@ public class QuizGame {
         escapeToMainMenu();
     }
     private void rocketLeagueQuizHighScores() {
-        try (PreparedStatement stmt = con.prepareStatement("SELECT * FROM scoreboard WHERE topic = 'Rocket League' ORDER BY score DESC, time ASC LIMIT 10")) {
+        try (PreparedStatement stmt = con.prepareStatement("SELECT * FROM scoreboard WHERE topic = 'Rocket League' ORDER BY score DESC, time LIMIT 10")) {
             ResultSet rs = stmt.executeQuery();
-            System.out.format("\033[96m\033[1m%-20s %5s %5s", "Username", "Score", "Time\033[0m");
+            System.out.println("\n\033[96m\033[1mTop 10 Rocket League scores\033[0m");
+            System.out.format("\033[36m\033[1m%-20s %5s %6s %s", "Username", "Score", "Time", "\n\033[0m");
             while (rs.next()) {
                 System.out.println(new UserScore(
                         rs.getString("username"),
@@ -337,10 +349,11 @@ public class QuizGame {
     }
 
     private void listAllScoresForUser(String user) {
-        try (PreparedStatement stmt = con.prepareStatement("SELECT * FROM scoreboard WHERE username = ?")) {
+        try (PreparedStatement stmt = con.prepareStatement("SELECT * FROM scoreboard WHERE username = ? ORDER BY Topic, score DESC, time")) {
             stmt.setString(1, user);
             ResultSet rs = stmt.executeQuery();
-            System.out.format("\033[96m\033[1m%-20s %5s %5s %s", "Username", "Score", "Time", "Topic\033[0m");
+            System.out.println("\n\033[96m\033[1mAll scores for \033[0m\033[36m\033[3m" + user + "\033[0m");
+            System.out.format("\033[36m\033[1m%-20s %5s %6s %s", "Username", "Score", "Time", "Topic\n\033[0m");
             while (rs.next()) {
                 System.out.println(new UserScore(
                         rs.getString("username"),
