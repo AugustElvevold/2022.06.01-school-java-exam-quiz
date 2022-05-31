@@ -1,7 +1,5 @@
 package com.kristiania;
 
-import java.util.ArrayList;
-
 public abstract class Quiz {
     String question;
     String correctAnswer;

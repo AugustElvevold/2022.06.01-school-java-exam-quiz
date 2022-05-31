@@ -9,6 +9,5 @@ public class Main {
 
         QuizGame newGame = new QuizGame();
         newGame.start();
-
     }
 }

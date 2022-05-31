@@ -5,13 +5,12 @@ import java.util.ArrayList;
 
 public class CreateDatabase {
 
+    Connection con = new DatabaseConnection().con;
     ArrayList<Quiz> quizQuestions = new ArrayList<>();
 
-    Connection con;
     public CreateDatabase() {
-        con = new DatabaseConnection().con;
         creatTables();
-        // emptyAllTables();
+        emptyAllTables();
         addQuestionsToArrayList();
         insertQuestionsToTables();
     }
@@ -54,17 +53,19 @@ public class CreateDatabase {
             );
             stmt.executeUpdate();
 
-            System.out.println("Successfully created all tables");
+            System.out.println("\033[32mSuccessfully created all tables\033[0m");
 
         } catch (SQLException e) {
             e.printStackTrace();
+            System.out.println("\033[91mError while trying to create tables\033[0m");
+            System.exit(69);
         }
     }
 
     private void emptyAllTables() {
         emptyBinaryQuizTable();
         emptyMultiChoiceQuizTable();
-        emptyScoreboardTable();
+//        emptyScoreboardTable();
     }
     private void emptyBinaryQuizTable() {
         try {
@@ -86,7 +87,9 @@ public class CreateDatabase {
             e.printStackTrace();
         }
     }
-    private void emptyScoreboardTable() {
+
+    // Uncomment in emptyAllTables() method to easily empty scoreboard table when starting the Java program
+    public void emptyScoreboardTable() {
         try {
             PreparedStatement stmt = con.prepareStatement(
                     "DELETE FROM scoreboard;"
@@ -100,28 +103,28 @@ public class CreateDatabase {
     private void addQuestionsToArrayList() {
         quizQuestions.add(new MultiChoiceQuiz(
                 "Which of these mobs can't drop a mob head item in survival?",
-                "C",
+                "c",
                 "Zombie",
                 "Creeper",
                 "Spider",
                 "Skeleton"));
         quizQuestions.add(new MultiChoiceQuiz(
                 "What color is a creeper?",
-                "A",
+                "a",
                 "Green",
                 "Black",
                 "Pink",
                 "Blue"));
         quizQuestions.add(new MultiChoiceQuiz(
                 "Whats the lowes level pickaxe you can mine diamonds with?",
-                "B",
+                "b",
                 "Wooden pickaxe",
                 "Iron pickaxe",
                 "Netherite pickaxe",
                 "Stone pickaxe"));
         quizQuestions.add(new MultiChoiceQuiz(
                 "Whats the seed of the world that was used in the first title screen panorama?",
-                "D",
+                "d",
                 "1985656462612183024",
                 "1466403486068282115",
                 "6866221629668753640",
@@ -141,7 +144,6 @@ public class CreateDatabase {
                 "no"));
     }
     private void insertQuestionsToTables() {
-
         for (Quiz object : quizQuestions) {
             if (object instanceof MultiChoiceQuiz multiChoiceQuiz) {
                 addMultiChoiceQuestion(multiChoiceQuiz);
@@ -150,6 +152,7 @@ public class CreateDatabase {
                 addBinaryQuizQuestion(binaryQuiz);
             }
         }
+        System.out.println("\033[32mAdded questions to tables\033[0m");
     }
 
     private void addMultiChoiceQuestion(MultiChoiceQuiz questionObject) {

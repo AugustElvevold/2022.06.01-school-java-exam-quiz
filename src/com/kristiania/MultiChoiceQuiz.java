@@ -18,9 +18,9 @@ public class MultiChoiceQuiz extends Quiz {
     @Override
     public void showQuestion() {
         System.out.println(super.question);
-        System.out.println("A: " + answerA +
-                           "B: " + answerB +
-                           "C: " + answerC +
+        System.out.println("A: " + answerA + "\t" +
+                           "B: " + answerB + "\t" +
+                           "C: " + answerC + "\t" +
                            "D: " + answerD);
     }
 
