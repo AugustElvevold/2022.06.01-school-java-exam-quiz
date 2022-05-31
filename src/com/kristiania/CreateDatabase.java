@@ -18,7 +18,7 @@ public class CreateDatabase {
     private void creatTables() {
         try {
             PreparedStatement stmt = con.prepareStatement(
-                    "CREATE TABLE IF NOT EXISTS multichoiceQuiz (" +
+                    "CREATE TABLE IF NOT EXISTS multiChoiceQuiz (" +
                     "id INT AUTO_INCREMENT NOT NULL," +
                     "question VARCHAR(255)," +
                     "answerA VARCHAR(255)," +
@@ -129,6 +129,13 @@ public class CreateDatabase {
                 "1466403486068282115",
                 "6866221629668753640",
                 "2151901553968352745"));
+        quizQuestions.add(new MultiChoiceQuiz(
+                "Whats the name of the player characters?",
+                "a",
+                "Steve and Alex",
+                "Bob and Anna",
+                "Pikachu and Togetic",
+                "Jens og Erna"));
 
         quizQuestions.add(new BinaryQuiz(
                 "Rocket League is a shooter game taking place in space",
@@ -142,6 +149,12 @@ public class CreateDatabase {
         quizQuestions.add(new BinaryQuiz(
                 "The highest rank you can get is 'Grand champ'",
                 "no"));
+        quizQuestions.add(new BinaryQuiz(
+                "Did NRG win Winter Major",
+                "no"));
+        quizQuestions.add(new BinaryQuiz(
+                "Is 'Snow Day' a game mode in Rocket League",
+                "yes"));
     }
     private void insertQuestionsToTables() {
         for (Quiz object : quizQuestions) {

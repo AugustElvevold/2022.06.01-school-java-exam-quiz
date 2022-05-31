@@ -116,7 +116,6 @@ public class QuizGame {
 
     /** Displays scoreboard sub menu */
     private void scoreboardMenu() {
-        //TODO: make fancy
         System.out.println("""
                 \033[96m\033[1m
                 Scoreboard menu\033[0m
@@ -367,10 +366,3 @@ public class QuizGame {
         escapeToMainMenu();
     }
 }
-
-// TODO:
-//      - Make menu work
-//      - Add scoreboard to end of session
-//      - Add quit game or go to main menu at any point
-//      - Make fetching quiz one at the time or all at once
-//      - Make questions random?
