@@ -4,7 +4,7 @@ public class Main {
     public static void main(String[] args) {
 
         // NOTE
-        // RUN "Create user and database.sql" BEFORE RUNNIN MAIN
+        // RUN "Create user and database.sql" BEFORE RUNNING MAIN
 
         // Fills database with all questions and answers
         new CreateDatabase();
