@@ -1,59 +1,63 @@
-# Java Project Setup Guide
+# Java Project Quiz
 
-This guide will walk you through setting up your environment to run the Java project found at [this GitHub repository](https://github.com/AugustElvevold/2022.06.01-school-java-exam-quiz.git).
+This Java application, originally developed as a part of an object-oriented programming exam, offers a terminal-based quiz experience. It connects to a local MySQL server to fetch quiz data. Upon launching, the application prompts users to input their usernames, which is later used for leaderboards. Users can choose between two quizzes: "Rocket League" (binary choice) and "Minecraft" (multiple choice). As each quiz commences, a timer begins. At the end, users can view a leaderboard, sorted by score and then time. The application offers other intriguing features, all accessible via terminal menus.
 
-## Prerequisites
+## Getting Started
 
-Before you begin, ensure you have the following tools installed:
+This guide will help you set up your development environment to run the Java Quiz Project.
+
+### Prerequisites
+
+Ensure you have the following tools installed:
 
 - Git
 - MySQL
 - Java (JDK)
 - IntelliJ Community Edition
 
-If you're not sure whether you have these tools installed, you can check using the following commands in your terminal:
+Verify installations using the following commands in terminal:
 
 ```bash
 git --version
 mysql --version
 java -version
 ```
+For IntelliJ, simply attempt to launch it.
 
+### Installing Dependencies
 
-To check IntelliJ, simply try launching it. If you don't have these tools, follow the instructions below.
+If you lack any of the aforementioned tools, Chocolatey can streamline the installation process:
+1. **Install Chocolatey** :
+   If Chocolatey isn't already installed, [follow the official guide](https://chocolatey.org/install).
+   Alternatively, you can execute this command in Windows PowerShell:
+   ```bash
+   Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+   ```
 
-## Installation using Chocolatey (Choco)
+2. **Install Prerequisites**:
+   ```bash
+   choco install git
+   choco install mysql
+   choco install jdk
+   choco install intellijidea-community
+   ```
 
-If you don't have the above tools, I recommend using Chocolatey to make the installation process seamless. First, ensure you have Chocolatey installed. If not, [follow these installation instructions](https://chocolatey.org/install), or if you're not as concerned about security just run this command in windows powershell: 
-```bash
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-```
+### Project Setup
 
-Once Chocolatey is installed, run the following commands in your terminal:
+#### Open IntelliJ and import the Project:
 
-```bash
-choco install git
-choco install mysql
-choco install jdk
-choco install intellijidea-community
-```
+1. Launch IntelliJ.
+2. Choose `Get from Version Control`.
+3. Enter the repository URL: `https://github.com/AugustElvevold/2022.06.01-school-java-exam-quiz.git`
 
-## Setting up the Project
+#### Configure MySQL:
+Refer to the "Create user and database.sql" file included in the project. You have two methods:
 
-1. **Open IntelliJ and Import the Project** :
+a.  **Using MySQL Workbench** :
+   * If you have MySQL Workbench, you can run the script there.
 
-* Launch IntelliJ.
-* Choose `Get from Version Control`.
-* Enter the repository URL: `https://github.com/AugustElvevold/2022.06.01-school-java-exam-quiz.git`
-
-1. **Setup MySQL User and Database** :
-   Open the "Create user and database.sql" file from the project. There are two methods to set up the database:
-
-   a.  **Using MySQL Workbench** :
-    * If you have MySQL Workbench, you can open it and run the script there.
-
-   b.  **Using powershell** :
-    * If you dont have Workbench, you can run the commands from the file directly in the terminal.
+b.  **Using powershell** :
+   * If you dont have Workbench, you can run the commands from the file directly in the terminal.
 
 ```sql
    -- If new installation of MySQL and not using Workbench, 
@@ -74,8 +78,8 @@ choco install intellijidea-community
 
 ## Note
 
-This project uses Maven for dependency management. You don't need to manually set up any additional libraries; Maven will handle that for you.
+For the exam submission, the project was delivered using vanilla Java without the assistance of any dependency management tools. However, to simplify the setup process for users setting up the project on their personal machines, Maven has been integrated. This ensures an easier and more seamless experience when managing and setting up dependencies.
 
 ---
 
-Now, you should be ready to run and explore the Java project!
+You're all set to dive into the Java Quiz Project! Enjoy quizzing!
